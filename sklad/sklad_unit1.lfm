@@ -1,8 +1,211 @@
 object Form1: TForm1
   Left = 1012
-  Height = 240
+  Height = 422
   Top = 130
-  Width = 320
+  Width = 460
   Caption = 'Form1'
+  ClientHeight = 422
+  ClientWidth = 460
+  OnCreate = FormCreate
   LCLVersion = '1.6.4.0'
+  object Memo1: TMemo
+    Left = 192
+    Height = 106
+    Top = 304
+    Width = 200
+    Lines.Strings = (
+      'Memo1'
+    )
+    TabOrder = 0
+  end
+  object Label1: TLabel
+    Left = 240
+    Height = 15
+    Top = 280
+    Width = 98
+    Caption = 'Nedostatok tovaru'
+    ParentColor = False
+  end
+  object StringGrid1: TStringGrid
+    Left = 24
+    Height = 378
+    Top = 32
+    Width = 136
+    ColCount = 2
+    FixedCols = 0
+    RowCount = 6
+    TabOrder = 1
+    ColWidths = (
+      64
+      62
+    )
+    Cells = (
+      12
+      0
+      0
+      'ID'
+      0
+      1
+      '417'
+      0
+      2
+      '482'
+      0
+      3
+      '574'
+      0
+      4
+      '671'
+      0
+      5
+      '125'
+      1
+      0
+      'POČET'
+      1
+      1
+      '75'
+      1
+      2
+      '81'
+      1
+      3
+      '85'
+      1
+      4
+      '90'
+      1
+      5
+      '100'
+    )
+  end
+  object PageControl1: TPageControl
+    Left = 192
+    Height = 162
+    Top = 32
+    Width = 200
+    ActivePage = TabSheet3
+    TabIndex = 2
+    TabOrder = 2
+    object TabSheet1: TTabSheet
+      Caption = 'Nakup'
+      ClientHeight = 134
+      ClientWidth = 192
+      object ID: TEdit
+        Left = 0
+        Height = 23
+        Top = 8
+        Width = 56
+        ParentShowHint = False
+        TabOrder = 0
+        Text = 'ID'
+      end
+      object Pocet: TEdit
+        Left = 72
+        Height = 23
+        Top = 8
+        Width = 80
+        TabOrder = 1
+        Text = 'Pocet'
+      end
+      object Button3: TButton
+        Left = 56
+        Height = 25
+        Top = 104
+        Width = 75
+        Caption = 'Potvrdiť'
+        OnClick = Button3Click
+        TabOrder = 2
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'Prikaz'
+      ClientHeight = 134
+      ClientWidth = 192
+      object ID_2: TEdit
+        Left = 0
+        Height = 23
+        Top = 8
+        Width = 56
+        TabOrder = 0
+        Text = 'ID'
+      end
+      object pocet_2: TEdit
+        Left = 72
+        Height = 23
+        Top = 8
+        Width = 80
+        TabOrder = 1
+        Text = 'Pocet'
+      end
+      object Pod: TEdit
+        Left = 0
+        Height = 23
+        Top = 40
+        Width = 80
+        TabOrder = 2
+        Text = 'Pod'
+      end
+      object Button7: TButton
+        Left = 56
+        Height = 25
+        Top = 104
+        Width = 75
+        Caption = 'Potvrdiť'
+        OnClick = Button7Click
+        TabOrder = 3
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = 'Rychly'
+      ClientHeight = 134
+      ClientWidth = 192
+      object Edit1: TEdit
+        Left = 0
+        Height = 23
+        Top = 8
+        Width = 56
+        TabOrder = 0
+        Text = 'Pod'
+      end
+      object Edit2: TEdit
+        Left = 72
+        Height = 23
+        Top = 8
+        Width = 80
+        TabOrder = 1
+        Text = 'Pocet'
+      end
+      object Button8: TButton
+        Left = 56
+        Height = 25
+        Top = 104
+        Width = 75
+        Caption = 'Potvrdiť'
+        OnClick = Button8Click
+        TabOrder = 2
+      end
+    end
+    object TabSheet4: TTabSheet
+      Caption = 'Historia'
+      ClientHeight = 134
+      ClientWidth = 192
+      object Memo2: TMemo
+        Left = 0
+        Height = 120
+        Top = 8
+        Width = 184
+        Lines.Strings = (
+          'Memo2'
+        )
+        TabOrder = 0
+      end
+    end
+  end
+  object Timer1: TTimer
+    Interval = 10000
+    OnTimer = Timer1Timer
+    left = 408
+    top = 312
+  end
 end
