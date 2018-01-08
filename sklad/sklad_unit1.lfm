@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 1012
+  Left = 726
   Height = 469
-  Top = 130
+  Top = 121
   Width = 699
-  Caption = 'Form1'
+  Caption = 'Sklad'
   ClientHeight = 469
   ClientWidth = 699
   OnCreate = FormCreate
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.4.0.4'
   object Memo1: TMemo
     Left = 256
     Height = 106
@@ -34,6 +34,7 @@ object Form1: TForm1
     Top = 32
     Width = 224
     ColCount = 3
+    ColumnClickSorts = True
     FixedCols = 0
     RowCount = 6
     TabOrder = 1
@@ -60,8 +61,8 @@ object Form1: TForm1
     Height = 162
     Top = 72
     Width = 200
-    ActivePage = TabSheet2
-    TabIndex = 1
+    ActivePage = TabSheet1
+    TabIndex = 0
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Manuálne'
