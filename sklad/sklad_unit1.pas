@@ -16,6 +16,7 @@ type
     Button3: TButton;
     Button7: TButton;
     Button8: TButton;
+    CheckBox1: TCheckBox;
     Edit1: TEdit;
     Edit2: TEdit;
     Label2: TLabel;
@@ -41,6 +42,7 @@ type
     procedure Button8Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Kontrola;
   private
     { private declarations }
   public
@@ -63,17 +65,13 @@ implementation
 {$R *.lfm}
 
 { TForm1 }
-
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.Kontrola;
 var i:integer;c:char;cislo:string;
 begin
-  Memo1.Clear;
-  Memo2.Clear;
-  AssignFile(sklad,'SKLAD.txt');
-  cislo:='';
-  prikaz:=0;
-  //citanie SKLAD.txt
-  Reset(sklad);
+//READ SUBOROV, UPOZORNENIA MALO KS, CHECK TRVALE PRIKAZY
+cislo:='';
+
+Reset(sklad);
   ReadLn(sklad,riadky);
   SetLength(pole,riadky);
   StringGrid1.RowCount:=riadky+1;
@@ -93,17 +91,26 @@ begin
   end;
 
   //nahodenie upozorneni
-  for i:=0 to riadky do
+  Memo1.Clear;
+  for i:=0 to riadky-1 do
   begin
     if pole[i].mnozstvo<50 then
       begin
         Memo1.Append(IntToStr(pole[i].kod)+' '+'nazov'+' '+IntToStr(pole[i].mnozstvo)+'ks');
       end;
-    {if pole[i].mnozstvo<20 then
-      begin
-        Memo1.Append(IntToStr(pole[i].kod)+' '+'nazov'+' '+IntToStr(pole[i].mnozstvo)+'ks');
-      end;}
   end;
+
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  Memo1.Clear;
+  Memo2.Clear;
+  AssignFile(sklad,'SKLAD.txt');
+  prikaz:=0;
+  //citanie SKLAD.txt
+  Kontrola;
+
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
@@ -114,6 +121,7 @@ end;
 procedure TForm1.Button3Click(Sender: TObject);
 var z:boolean;i,k:integer;
 begin
+//MANUALNA OBJEDNAVKA
 z:=false;
 i:=0;
 repeat
@@ -129,29 +137,58 @@ repeat
     WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
     end;
     CloseFile(sklad);
+    //aktualizacia tabulky
+    Kontrola;
     //tu dojde generovanie transakcie
   end;
   inc(i);
 until (z=true) or (i=riadky-1);
+if z=false then
+  ShowMessage('Vami zadany nazov alebo kod produktu nie je v databaze');
 end;
 
 procedure TForm1.Button7Click(Sender: TObject);
+var z:boolean;i,k:integer;
 begin
-inc(prikaz);
-StringGrid3.Cells[0,prikaz]:=ID_2.Text;
-StringGrid3.Cells[1,prikaz]:=Pod.Text;
-StringGrid3.Cells[2,prikaz]:=pocet_2.Text;
+//TRVALY PRIKAZ
+z:=false;
+i:=0;
+
+if CheckBox1.Checked=true then
+begin
+  inc(prikaz);
+    StringGrid3.Cells[0,prikaz]:='Vsetko';
+    StringGrid3.Cells[1,prikaz]:=Pod.Text;
+    StringGrid3.Cells[2,prikaz]:=pocet_2.Text;
+end
+else begin
+  repeat
+    if (StrToInt(ID_2.Text)=pole[i].kod) then
+    begin
+      z:=true;
+      inc(prikaz);
+       StringGrid3.Cells[0,prikaz]:=ID_2.Text;
+       StringGrid3.Cells[1,prikaz]:=Pod.Text;
+        StringGrid3.Cells[2,prikaz]:=pocet_2.Text;
+    end;
+    inc(i);
+  until (z=true) or (i=riadky-1);
+end;
+
+if (z=false) and (CheckBox1.Checked=false) then
+  ShowMessage('Vami zadany nazov alebo kod produktu nie je v databaze');
 
 end;
 
 procedure TForm1.Button8Click(Sender: TObject);
 var i,k:integer;
 begin
-  for i:=0 to riadky do
+//SEMI-AUTO NAKUP
+  for i:=0 to riadky-1 do
   begin
     if pole[i].mnozstvo<StrToInt(Edit1.Text) then
     begin
-      pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Edit1.Text);
+      pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Edit2.Text);
       ReWrite(sklad);
       WriteLn(sklad,riadky);
       for k:=0 to riadky do
@@ -159,6 +196,8 @@ begin
         WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
       end;
       CloseFile(sklad);
+      //aktualizacia tabulky
+      Kontrola;
       //tu dojde generovanie transakcie
     end;
   end;
