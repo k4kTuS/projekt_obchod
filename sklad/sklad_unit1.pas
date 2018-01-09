@@ -57,7 +57,7 @@ type
   end;
 var
   Form1: TForm1;
-  sklad:textfile;
+  sklad,cena,tovar:textfile;
   pole:array of hodnoty;
   riadky,prikaz:integer;
 implementation
@@ -66,11 +66,14 @@ implementation
 
 { TForm1 }
 procedure TForm1.Kontrola;
-var i:integer;c:char;cislo:string;
+var i,k:integer;c:char;cislo,price,namee:string;
 begin
 //READ SUBOROV, UPOZORNENIA MALO KS, CHECK TRVALE PRIKAZY
 cislo:='';
+price:='';
+namee:='';
 
+//SKLAD
 Reset(sklad);
   ReadLn(sklad,riadky);
   SetLength(pole,riadky);
@@ -90,13 +93,67 @@ Reset(sklad);
     StringGrid1.Cells[2,i+1]:=IntToStr(pole[i].mnozstvo);
   end;
 
+//CENA
+Reset(cena);
+  ReadLn(cena);
+  for i:=0 to riadky-1 do
+  begin
+    Read(cena,c);
+    repeat
+        cislo:=cislo+c;
+      Read(cena,c);
+    until c=';';
+
+    Read(cena,c);
+    repeat
+      price:=price+c;
+      Read(cena,c);
+    until c=';';
+    Readln(cena);
+
+    for k:=0 to riadky-1 do
+    begin
+      if StrToInt(cislo) = pole[k].kod then
+      begin
+        pole[k].cena:=StrToFloat(price);
+      end;
+    end;
+    cislo:='';
+    price:='';
+    StringGrid1.Cells[1,i+1]:=FloatToStr(pole[i].cena);
+  end;
+
+//NAZOV
+Reset(tovar);
+  ReadLn(tovar);
+  for i:=0 to riadky-1 do
+  begin
+    Read(tovar,c);
+    repeat
+        cislo:=cislo+c;
+      Read(tovar,c);
+    until c=';';
+    ReadLn(tovar,namee);
+
+    for k:=0 to riadky-1 do
+    begin
+      if StrToInt(cislo) = pole[k].kod then
+      begin
+        pole[k].nazov:=namee;
+      end;
+    end;
+    cislo:='';
+    namee:='';
+    StringGrid1.Cells[1,i+1]:=pole[i].nazov;
+  end;
+
   //nahodenie upozorneni
   Memo1.Clear;
   for i:=0 to riadky-1 do
   begin
     if pole[i].mnozstvo<50 then
       begin
-        Memo1.Append(IntToStr(pole[i].kod)+' '+'nazov'+' '+IntToStr(pole[i].mnozstvo)+'ks');
+        Memo1.Append(IntToStr(pole[i].kod)+' '+pole[i].nazov+' '+IntToStr(pole[i].mnozstvo)+'ks');
       end;
   end;
 
@@ -107,8 +164,10 @@ begin
   Memo1.Clear;
   Memo2.Clear;
   AssignFile(sklad,'SKLAD.txt');
+  AssignFile(tovar,'TOVAR.txt');
+  AssignFile(cena,'CENNIK.txt');
   prikaz:=0;
-  //citanie SKLAD.txt
+  //citanie SKLAD,CENA,TOVAR
   Kontrola;
 
 end;
@@ -125,10 +184,10 @@ begin
 z:=false;
 i:=0;
 repeat
-  if StrToInt(ID.Text)=pole[i].kod then
+  if StrToInt(ID.Text)=pole[i].kod {or (ID.Text = pole[i].nazov)}  then
   begin
     z:=true;
-    Memo2.Append('Manual: '+IntToStr(pole[i].kod)+'/'+'Nazov'+' '+Pocet.Text+'ks');
+    Memo2.Append('Manual: '+IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+Pocet.Text+'ks');
     pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Pocet.Text);
     ReWrite(sklad);
     WriteLn(sklad,riadky);
