@@ -21,9 +21,17 @@ type
     Edit1: TEdit;
     Edit2: TEdit;
     Edit3: TEdit;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label12: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     Memo2: TMemo;
     Pod: TEdit;
     pocet_2: TEdit;
@@ -40,7 +48,6 @@ type
     TabSheet3: TTabSheet;
     Timer1: TTimer;
     procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
@@ -66,13 +73,22 @@ type
     dokup:integer;
     nazov:string;
   end;
+type
+  statistiky=record
+    typ:char;
+    id_t:integer;
+    kod:integer;
+    mnozstvo:integer;
+    cena:float;
+  end;
 
 var
   Form1: TForm1;
-  sklad,cena,tovar,transakcia,statistiky:textfile;
+  sklad,cena,tovar,transakcia:textfile;
   pole:array of hodnoty;
   prikazy:array of trvale;
-  riadky,prikaz:integer;
+  stat:array of statistiky;
+  riadky,prikaz,obchody:integer;
   aktual:boolean;
 implementation
 
@@ -116,8 +132,66 @@ Reset(sklad);
           if pole[i].mnozstvo < prikazy[z].pokles then
           begin
             pole[i].mnozstvo:=pole[i].mnozstvo + prikazy[z].dokup;
-            Memo2.Append('Trvaly: '+IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+IntToStr(prikazy[z].dokup)+'ks');
-
+            Memo2.Append('Trvaly: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+IntToStr(prikazy[z].dokup)+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
+            //tu dojde generovanie transakcie
+            Reset(transakcia);
+            ReadLn(transakcia,obchody);
+            SetLength(stat,obchody+1);
+            for k:=1 to obchody do
+            begin
+              //typ
+              Read(transakcia,stat[k].typ);
+              Read(transakcia,c);
+              Read(transakcia,c);
+              cislo:='';
+              //id transakcie
+              repeat
+                cislo:=cislo+c;
+                Read(transakcia,c);
+              until c=';';
+              stat[k].id_t:=StrToInt(cislo);
+              cislo:='';
+              Read(transakcia,c);
+              //id tovaru
+              repeat
+                cislo:=cislo+c;
+                Read(transakcia,c);
+              until c=';';
+              stat[k].kod:=StrToInt(cislo);
+              cislo:='';
+              Read(transakcia,c);
+              //mnozstvo
+              repeat
+                cislo:=cislo+c;
+                Read(transakcia,c);
+              until c=';';
+              stat[k].mnozstvo:=StrToInt(cislo);
+              cislo:='';
+              //cena kus
+              ReadLn(transakcia,cislo);
+              stat[k].cena:=StrToFloat(cislo);
+              cislo:='';
+            end;
+            //pridanie novej transakcie a zapisanie do suboru
+            inc(obchody);
+            SetLength(stat,obchody+1);
+            stat[obchody].typ:='N';
+            stat[obchody].id_t:=Random(89999999)+10000000;
+            stat[obchody].kod:=pole[i].kod;
+            stat[obchody].mnozstvo:=prikazy[z].dokup;
+            stat[obchody].cena:=pole[i].cena;
+            //Zapis do statistik
+            if obchody>0 then
+            begin
+              ReWrite(transakcia);
+              WriteLn(transakcia,obchody);
+              for k:=1 to obchody do
+              begin
+                WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
+              end;
+              CloseFile(transakcia);
+            end;
+            //koniec transakcie
           end;
         end;
       end;
@@ -163,7 +237,7 @@ Reset(cena);
     end;
     cislo:='';
     price:='';
-    StringGrid1.Cells[1,i+1]:=FloatToStr(pole[i].cena);
+    //StringGrid1.Cells[1,i+1]:=FloatToStr(pole[i].cena);
   end;
 
 //NAZOV
@@ -196,7 +270,7 @@ Reset(tovar);
   begin
     if pole[i].mnozstvo<50 then
       begin
-        Memo1.Append(IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+IntToStr(pole[i].mnozstvo)+'ks');
+        Memo1.Append('['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+IntToStr(pole[i].mnozstvo)+'ks');
       end;
   end;
 
@@ -209,6 +283,7 @@ begin
   AssignFile(sklad,'SKLAD.txt');
   AssignFile(tovar,'TOVAR.txt');
   AssignFile(cena,'CENNIK.txt');
+  AssignFile(transakcia,'STATISTIKY.txt');
   prikaz:=0;
   //citanie SKLAD,CENA,TOVAR
   Kontrola;
@@ -222,20 +297,30 @@ begin
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
-var z,cisla:boolean;i,k:integer;
+var z,cisla:boolean;i,k:integer;c:char;cislo:string;
 begin
 //MANUALNA OBJEDNAVKA
 aktual:=false;
+Kontrola;
 z:=false;
 i:=0;
+cisla:=true;
+
+if (ID.Text='') or (Pocet.Text='') then
+  cisla:=false;
+
+if cisla=true then
+begin
+
 repeat
-  cisla:=true;
+
   if (ID.Text = pole[i].nazov) then
   begin
     z:=true;
+
     if StrToInT(Pocet.Text)>0 then
     begin
-      Memo2.Append('Manual: '+IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+Pocet.Text+'ks');
+      Memo2.Append('Manual: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Pocet.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
       pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Pocet.Text);
       ReWrite(sklad);
       WriteLn(sklad,riadky);
@@ -247,10 +332,64 @@ repeat
       //aktualizacia tabulky
       Kontrola;
       //tu dojde generovanie transakcie
-      {AssignFile(transakcia,'N'+IntToStr(Random(8999999999)+1000000000)+'.txt');
-      ReWrite(transakcia);
-      WriteLn(transakcia,pole[i].kod,';',Pocet.Text+';'+FloatToStr(pole[i].cena));
-      CloseFile(transakcia);}
+      Reset(transakcia);
+      ReadLn(transakcia,obchody);
+      SetLength(stat,obchody+1);
+      for k:=1 to obchody do
+      begin
+        //typ
+        Read(transakcia,stat[k].typ);
+        Read(transakcia,c);
+        Read(transakcia,c);
+        cislo:='';
+        //id transakcie
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].id_t:=StrToInt(cislo);
+        cislo:='';
+        Read(transakcia,c);
+        //id tovaru
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].kod:=StrToInt(cislo);
+        cislo:='';
+        Read(transakcia,c);
+        //mnozstvo
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].mnozstvo:=StrToInt(cislo);
+        cislo:='';
+        //cena kus
+        ReadLn(transakcia,cislo);
+        stat[k].cena:=StrToFloat(cislo);
+        cislo:='';
+      end;
+      //pridanie novej transakcie a zapisanie do suboru
+      inc(obchody);
+      SetLength(stat,obchody+1);
+      stat[obchody].typ:='N';
+      stat[obchody].id_t:=Random(89999999)+10000000;
+      stat[obchody].kod:=pole[i].kod;
+      stat[obchody].mnozstvo:=StrToInt(Pocet.Text);
+      stat[obchody].cena:=pole[i].cena;
+      //Zapis do statistik
+      if obchody>0 then
+      begin
+        ReWrite(transakcia);
+        WriteLn(transakcia,obchody);
+        for k:=1 to obchody do
+        begin
+          WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
+        end;
+        CloseFile(transakcia);
+      end;
+      //koniec transakcie
     end
     else
       ShowMessage('Dokúpiť môžete len kladné množstvo tovaru');
@@ -269,9 +408,10 @@ repeat
       if StrToInt(ID.Text)=pole[i].kod then
       begin
         z:=true;
+
         if StrToInT(Pocet.Text)>0 then
         begin
-          Memo2.Append('Manual: '+IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+Pocet.Text+'ks');
+          Memo2.Append('Manual: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Pocet.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
           pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Pocet.Text);
           ReWrite(sklad);
           WriteLn(sklad,riadky);
@@ -283,7 +423,64 @@ repeat
           //aktualizacia tabulky
           Kontrola;
           //tu dojde generovanie transakcie
-
+          Reset(transakcia);
+          ReadLn(transakcia,obchody);
+          SetLength(stat,obchody+1);
+          for k:=1 to obchody do
+          begin
+            //typ
+            Read(transakcia,stat[k].typ);
+            Read(transakcia,c);
+            Read(transakcia,c);
+            cislo:='';
+            //id transakcie
+            repeat
+              cislo:=cislo+c;
+              Read(transakcia,c);
+            until c=';';
+            stat[k].id_t:=StrToInt(cislo);
+            cislo:='';
+            Read(transakcia,c);
+            //id tovaru
+            repeat
+              cislo:=cislo+c;
+              Read(transakcia,c);
+            until c=';';
+            stat[k].kod:=StrToInt(cislo);
+            cislo:='';
+            Read(transakcia,c);
+            //mnozstvo
+            repeat
+              cislo:=cislo+c;
+              Read(transakcia,c);
+            until c=';';
+            stat[k].mnozstvo:=StrToInt(cislo);
+            cislo:='';
+            //cena kus
+            ReadLn(transakcia,cislo);
+            stat[k].cena:=StrToFloat(cislo);
+            cislo:='';
+          end;
+          //pridanie novej transakcie a zapisanie do suboru
+          inc(obchody);
+          SetLength(stat,obchody+1);
+          stat[obchody].typ:='N';
+          stat[obchody].id_t:=Random(89999999)+10000000;
+          stat[obchody].kod:=pole[i].kod;
+          stat[obchody].mnozstvo:=StrToInt(Pocet.Text);
+          stat[obchody].cena:=pole[i].cena;
+          //Zapis do statistik
+          if obchody>0 then
+          begin
+            ReWrite(transakcia);
+            WriteLn(transakcia,obchody);
+            for k:=1 to obchody do
+            begin
+              WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
+            end;
+            CloseFile(transakcia);
+          end;
+          //koniec transakcie
         end
         else
           ShowMessage('Dokúpiť môžete len kladné množstvo tovaru');
@@ -294,27 +491,23 @@ repeat
 until (z=true) or (i=riadky);
 if z=false then
   ShowMessage('Vami zadany nazov alebo kod produktu nie je v databaze');
+end
+else
+  ShowMessage('Treba vyplniť všetky polia');
 
 aktual:=true;
-end;
-
-procedure TForm1.Button2Click(Sender: TObject);
-begin
-  Kontrola;
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var help,k:integer;cisla:boolean;
 begin
 cisla:=true;
-  for k:=1 to length(Edit3.Text) do
+  if Edit3.Text='' then
   begin
-    if (Edit3.Text[k] < '0') or (Edit3.Text[k] > '9') then
-      begin
-        cisla:=false;
-      end;
+    cisla:=false;
   end;
-  if cisla=true then
+
+  if (cisla=true) and (prikaz>0) then
   begin
     aktual:=false;
     help:=StrToInt(Edit3.text);
@@ -348,9 +541,17 @@ var z,cisla,opakovanie:boolean;i,k:integer;
 begin
 //TRVALY PRIKAZ
 aktual:=false;
+Kontrola;
 z:=false;
 i:=0;
 opakovanie:=false;
+cisla:=true;
+
+if (((ID_2.Text='') or (pocet_2.Text='') or (Pod.Text='')) and (CheckBox1.Checked=false)) or (((pocet_2.Text='') or (Pod.Text='')) and (CheckBox1.Checked=true)) then
+    cisla:=false;
+
+if cisla=true then
+begin
 
 if CheckBox1.Checked=true then
 begin
@@ -380,7 +581,7 @@ begin
 end
 else begin
   repeat
-    cisla:=true;
+    //cisla:=true;
 
     if prikaz > 0 then
     begin
@@ -451,7 +652,7 @@ else begin
       end;
     end;
     inc(i);
-  until (z=true) or (i=riadky-1);
+  until (z=true) or (i=riadky);
 end;
 
 if (z=false) and (CheckBox1.Checked=false) and (opakovanie = false) then
@@ -459,20 +660,30 @@ if (z=false) and (CheckBox1.Checked=false) and (opakovanie = false) then
 
 if opakovanie = true then
   ShowMessage('Pre tento tovar už existuje vytvorený príkaz, ak chcete príkaz zmeniť, musíte aktuálny najprv odstrániť');
-
+end
+else
+  ShowMessage('Treba vyplniť všetky potrebné polia');
 aktual:=true;
 end;
 
 procedure TForm1.Button8Click(Sender: TObject);
-var i,k:integer;
+var i,k:integer;cisla:boolean;c:char;cislo:string;
 begin
 //SEMI-AUTO NAKUP
 aktual:=false;
+Kontrola;
+cisla:=true;
+
+if (Edit1.Text='') or (Edit2.Text='') then
+  cisla:=false;
+
+if cisla=true then
+begin
   for i:=0 to riadky-1 do
   begin
     if pole[i].mnozstvo<StrToInt(Edit1.Text) then
     begin
-      Memo2.Append('Semi-auto: '+IntToStr(pole[i].kod)+'/'+pole[i].nazov+' '+Edit2.Text+'ks');
+      Memo2.Append('Semi-auto: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Edit2.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
       pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Edit2.Text);
       ReWrite(sklad);
       WriteLn(sklad,riadky);
@@ -484,11 +695,70 @@ aktual:=false;
       //aktualizacia tabulky
       Kontrola;
       //tu dojde generovanie transakcie
-
+      Reset(transakcia);
+      ReadLn(transakcia,obchody);
+      SetLength(stat,obchody+1);
+      for k:=1 to obchody do
+      begin
+        //typ
+        Read(transakcia,stat[k].typ);
+        Read(transakcia,c);
+        Read(transakcia,c);
+        cislo:='';
+        //id transakcie
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].id_t:=StrToInt(cislo);
+        cislo:='';
+        Read(transakcia,c);
+        //id tovaru
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].kod:=StrToInt(cislo);
+        cislo:='';
+        Read(transakcia,c);
+        //mnozstvo
+        repeat
+          cislo:=cislo+c;
+          Read(transakcia,c);
+        until c=';';
+        stat[k].mnozstvo:=StrToInt(cislo);
+        cislo:='';
+        //cena kus
+        ReadLn(transakcia,cislo);
+        stat[k].cena:=StrToFloat(cislo);
+        cislo:='';
+      end;
+      //pridanie novej transakcie a zapisanie do suboru
+      inc(obchody);
+      SetLength(stat,obchody+1);
+      stat[obchody].typ:='N';
+      stat[obchody].id_t:=Random(89999999)+10000000;
+      stat[obchody].kod:=pole[i].kod;
+      stat[obchody].mnozstvo:=StrToInt(Edit2.Text);
+      stat[obchody].cena:=pole[i].cena;
+      //Zapis do statistik
+      if obchody>0 then
+      begin
+        ReWrite(transakcia);
+        WriteLn(transakcia,obchody);
+        for k:=1 to obchody do
+        begin
+          WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
+        end;
+        CloseFile(transakcia);
+      end;
     end;
   end;
+end
+else
+  ShowMessage('Treba vyplniť všetky polia');
+
 aktual:=true;
 end;
-
 end.
 

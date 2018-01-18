@@ -1,17 +1,18 @@
 object Form1: TForm1
-  Left = 1009
+  Left = 1010
   Height = 469
-  Top = 130
-  Width = 841
+  Top = 129
+  Width = 955
   Caption = 'Sklad'
   ClientHeight = 469
-  ClientWidth = 841
+  ClientWidth = 955
+  Color = clGradientActiveCaption
   OnCreate = FormCreate
   LCLVersion = '1.6.4.0'
   object Memo1: TMemo
-    Left = 256
+    Left = 288
     Height = 106
-    Top = 304
+    Top = 336
     Width = 200
     Lines.Strings = (
       'Memo1'
@@ -19,9 +20,9 @@ object Form1: TForm1
     TabOrder = 0
   end
   object Label1: TLabel
-    Left = 304
+    Left = 336
     Height = 15
-    Top = 280
+    Top = 312
     Width = 98
     Caption = 'Nedostatok tovaru'
     Color = clWhite
@@ -30,9 +31,9 @@ object Form1: TForm1
   end
   object StringGrid1: TStringGrid
     Left = 8
-    Height = 378
+    Height = 410
     Top = 32
-    Width = 224
+    Width = 219
     ColCount = 3
     ColumnClickSorts = True
     FixedCols = 0
@@ -58,78 +59,89 @@ object Form1: TForm1
   end
   object PageControl1: TPageControl
     Left = 256
-    Height = 162
-    Top = 72
-    Width = 200
-    ActivePage = TabSheet2
-    TabIndex = 1
+    Height = 188
+    Top = 56
+    Width = 249
+    ActivePage = TabSheet3
+    TabIndex = 2
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Manuálne'
-      ClientHeight = 134
-      ClientWidth = 192
+      ClientHeight = 160
+      ClientWidth = 241
       object ID: TEdit
         Left = 0
         Height = 23
-        Top = 8
+        Top = 24
         Width = 64
         ParentShowHint = False
         TabOrder = 0
-        Text = 'ID/Názov'
       end
       object Pocet: TEdit
-        Left = 104
+        Left = 152
         Height = 23
-        Top = 8
+        Top = 24
         Width = 80
         NumbersOnly = True
         TabOrder = 1
-        Text = 'Dokúpiť (ks)'
       end
       object Button3: TButton
-        Left = 56
+        Left = 80
         Height = 25
-        Top = 40
+        Top = 80
         Width = 75
         Caption = 'Objednať'
         OnClick = Button3Click
         TabOrder = 2
       end
+      object Label6: TLabel
+        Left = 0
+        Height = 15
+        Top = 8
+        Width = 49
+        Caption = 'ID/Názov'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 152
+        Height = 15
+        Top = 8
+        Width = 65
+        Caption = 'Dokúpiť (ks)'
+        ParentColor = False
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Trvalý príkaz'
-      ClientHeight = 134
-      ClientWidth = 192
+      ClientHeight = 160
+      ClientWidth = 241
       object ID_2: TEdit
         Left = 0
         Height = 23
-        Top = 8
+        Top = 24
         Width = 64
         TabOrder = 0
-        Text = 'ID/Názov'
       end
       object pocet_2: TEdit
-        Left = 104
+        Left = 152
         Height = 23
-        Top = 8
+        Top = 24
         Width = 80
         NumbersOnly = True
         TabOrder = 1
-        Text = 'Dokúpiť (ks)'
       end
       object Pod: TEdit
         Left = 0
         Height = 23
-        Top = 72
+        Top = 104
         Width = 96
         NumbersOnly = True
         TabOrder = 2
-        Text = 'Klesne pod (ks)'
       end
       object Button7: TButton
-        Left = 56
+        Left = 88
         Height = 25
-        Top = 104
+        Top = 135
         Width = 75
         Caption = 'Nastaviť'
         OnClick = Button7Click
@@ -138,35 +150,58 @@ object Form1: TForm1
       object CheckBox1: TCheckBox
         Left = 0
         Height = 19
-        Top = 40
+        Top = 56
         Width = 190
         Caption = 'Univerzalny prikaz (vsetok tovar)'
         TabOrder = 4
       end
+      object Label10: TLabel
+        Left = 0
+        Height = 15
+        Top = 8
+        Width = 49
+        Caption = 'ID/Názov'
+        ParentColor = False
+      end
+      object Label11: TLabel
+        Left = 152
+        Height = 15
+        Top = 8
+        Width = 65
+        Caption = 'Dokúpiť (ks)'
+        ParentColor = False
+      end
+      object Label12: TLabel
+        Left = 0
+        Height = 15
+        Top = 88
+        Width = 80
+        Caption = 'Klesne pod (ks)'
+        ParentColor = False
+      end
     end
     object TabSheet3: TTabSheet
       Caption = 'Rýchle doplnenie'
-      ClientHeight = 134
-      ClientWidth = 192
+      ClientHeight = 160
+      ClientWidth = 241
       object Edit1: TEdit
         Left = 0
         Height = 23
-        Top = 8
+        Top = 24
         Width = 112
+        NumbersOnly = True
         TabOrder = 0
-        Text = 'Množstvo pod (ks)'
       end
       object Edit2: TEdit
-        Left = 0
+        Left = 152
         Height = 23
-        Top = 40
+        Top = 24
         Width = 80
         NumbersOnly = True
         TabOrder = 1
-        Text = 'Dokúpiť (ks)'
       end
       object Button8: TButton
-        Left = 56
+        Left = 80
         Height = 25
         Top = 80
         Width = 75
@@ -174,12 +209,28 @@ object Form1: TForm1
         OnClick = Button8Click
         TabOrder = 2
       end
+      object Label8: TLabel
+        Left = 0
+        Height = 15
+        Top = 8
+        Width = 98
+        Caption = 'Množstvo pod (ks)'
+        ParentColor = False
+      end
+      object Label9: TLabel
+        Left = 152
+        Height = 15
+        Top = 8
+        Width = 65
+        Caption = 'Dokúpiť (ks)'
+        ParentColor = False
+      end
     end
   end
   object Label2: TLabel
-    Left = 304
+    Left = 328
     Height = 15
-    Top = 48
+    Top = 32
     Width = 110
     Caption = 'Objednávanie tovaru'
     Color = clWhite
@@ -187,10 +238,10 @@ object Form1: TForm1
     Transparent = False
   end
   object StringGrid3: TStringGrid
-    Left = 472
-    Height = 162
-    Top = 72
-    Width = 368
+    Left = 544
+    Height = 188
+    Top = 56
+    Width = 361
     FixedCols = 0
     TabOrder = 3
     ColWidths = (
@@ -220,9 +271,9 @@ object Form1: TForm1
     )
   end
   object Label3: TLabel
-    Left = 616
+    Left = 680
     Height = 15
-    Top = 48
+    Top = 32
     Width = 87
     Caption = 'Aktuálne príkazy'
     Color = clWhite
@@ -230,19 +281,19 @@ object Form1: TForm1
     Transparent = False
   end
   object Memo2: TMemo
-    Left = 488
+    Left = 600
     Height = 106
-    Top = 304
-    Width = 184
+    Top = 336
+    Width = 280
     Lines.Strings = (
       'Memo2'
     )
     TabOrder = 4
   end
   object Label4: TLabel
-    Left = 528
+    Left = 688
     Height = 15
-    Top = 280
+    Top = 312
     Width = 106
     Caption = 'História objednávok'
     Color = clWhite
@@ -250,26 +301,36 @@ object Form1: TForm1
     Transparent = False
   end
   object Button1: TButton
-    Left = 760
+    Left = 830
     Height = 25
-    Top = 240
+    Top = 264
     Width = 75
     Caption = 'Odstrániť'
     OnClick = Button1Click
     TabOrder = 5
   end
   object Edit3: TEdit
-    Left = 664
+    Left = 734
     Height = 23
-    Top = 240
+    Top = 264
     Width = 80
+    NumbersOnly = True
     TabOrder = 6
-    Text = 'č. príkazu'
+  end
+  object Label5: TLabel
+    Left = 734
+    Height = 15
+    Top = 248
+    Width = 52
+    Caption = 'Č. príkazu'
+    Color = clWhite
+    ParentColor = False
+    Transparent = False
   end
   object Timer1: TTimer
     Interval = 5000
     OnTimer = Timer1Timer
-    left = 440
-    top = 8
+    left = 240
+    top = 408
   end
 end
