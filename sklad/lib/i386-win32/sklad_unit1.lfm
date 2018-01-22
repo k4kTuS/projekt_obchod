@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 280
+  Left = 878
   Height = 469
-  Top = 120
+  Top = 119
   Width = 955
   Caption = 'Sklad'
   ClientHeight = 469
@@ -189,6 +189,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 112
+        NumbersOnly = True
         TabOrder = 0
       end
       object Edit2: TEdit
@@ -313,6 +314,7 @@ object Form1: TForm1
     Height = 23
     Top = 264
     Width = 80
+    NumbersOnly = True
     TabOrder = 6
   end
   object Label5: TLabel

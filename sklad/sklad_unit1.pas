@@ -81,7 +81,8 @@ type
     mnozstvo:integer;
     cena:float;
   end;
-
+const
+  path='';  //\\comenius\public\market\timb\
 var
   Form1: TForm1;
   sklad,cena,tovar,transakcia:textfile;
@@ -90,130 +91,68 @@ var
   stat:array of statistiky;
   riadky,prikaz,obchody:integer;
   aktual:boolean;
+  editcennik,edittovar:LongInt;
 implementation
 
 {$R *.lfm}
 
 { TForm1 }
 procedure TForm1.Kontrola;
-var i,z,k:integer;c:char;cislo,price,namee:string;
+var i,z,k,F1,F2,F3,F4,help,test:integer;lock:boolean;c:char;cislo,price,ks:string;
 begin
 //READ SUBOROV, UPOZORNENIA MALO KS, CHECK TRVALE PRIKAZY
 cislo:='';
 price:='';
-namee:='';
+ks:='';
+test:=0;
 
-//SKLAD
-Reset(sklad);
-  ReadLn(sklad,riadky);
+if (FileExists(path+'SKLAD.txt')=true) and (FileExists(path+'CENNIK.txt')=true) and (FileExists(path+'TOVAR.txt')=true) then
+begin
+if not (FileExists(path+'SKLAD_LOCK.txt')=true) or (FileExists(path+'CENNIK_LOCK.txt')=true) or (FileExists(path+'TOVAR_LOCK.txt')=true) then
+begin
+//LOCKOVANIE
+F1:=FileCreate(path+'SKLAD_LOCK.txt');
+
+{if (FileAge(path+'CENNIK.txt')<>editcennik) or (FileAge(path+'TOVAR.txt')<>edittovar) then
+begin
+editcennik:=FileAge(path+'CENNIK.txt');
+edittovar:=FileAge(path+'TOVAR.txt');}
+
+F2:=FileCreate(path+'CENNIK_LOCK.txt');
+F3:=FileCreate(path+'TOVAR_LOCK.txt');
+
+//NAZOV
+Reset(tovar);
+  ReadLn(tovar,riadky);
   SetLength(pole,riadky);
-  StringGrid1.RowCount:=riadky+1;
-  StringGrid1.ColCount:=3;
-  for i:=0 to riadky-1 do
-  begin
-    Read(sklad,c);
-    repeat
-        cislo:=cislo+c;
-      Read(sklad,c);
-    until c=';';
-    pole[i].kod:=StrToInt(cislo);
-    cislo:='';
-    ReadLn(sklad,pole[i].mnozstvo);
-    StringGrid1.Cells[0,i+1]:=IntToStr(pole[i].kod);
-    StringGrid1.Cells[2,i+1]:=IntToStr(pole[i].mnozstvo);
 
-    //kontrola prikazov
-    if prikaz>0 then
-    begin
-      for z:=1 to prikaz do
-      begin
-        if (pole[i].kod = prikazy[z].kod) or (prikazy[z].kod = 0) then
-        begin
-          if pole[i].mnozstvo < prikazy[z].pokles then
-          begin
-            pole[i].mnozstvo:=pole[i].mnozstvo + prikazy[z].dokup;
-            Memo2.Append('Trvaly: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+IntToStr(prikazy[z].dokup)+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
-            //tu dojde generovanie transakcie
-            Reset(transakcia);
-            ReadLn(transakcia,obchody);
-            SetLength(stat,obchody+1);
-            for k:=1 to obchody do
-            begin
-              //typ
-              Read(transakcia,stat[k].typ);
-              Read(transakcia,c);
-              Read(transakcia,c);
-              cislo:='';
-              //id transakcie
-              repeat
-                cislo:=cislo+c;
-                Read(transakcia,c);
-              until c=';';
-              stat[k].id_t:=StrToInt(cislo);
-              cislo:='';
-              Read(transakcia,c);
-              //id tovaru
-              repeat
-                cislo:=cislo+c;
-                Read(transakcia,c);
-              until c=';';
-              stat[k].kod:=StrToInt(cislo);
-              cislo:='';
-              Read(transakcia,c);
-              //mnozstvo
-              repeat
-                cislo:=cislo+c;
-                Read(transakcia,c);
-              until c=';';
-              stat[k].mnozstvo:=StrToInt(cislo);
-              cislo:='';
-              //cena kus
-              ReadLn(transakcia,cislo);
-              stat[k].cena:=StrToFloat(cislo);
-              cislo:='';
-            end;
-            //pridanie novej transakcie a zapisanie do suboru
-            inc(obchody);
-            SetLength(stat,obchody+1);
-            stat[obchody].typ:='N';
-            stat[obchody].id_t:=Random(89999999)+10000000;
-            stat[obchody].kod:=pole[i].kod;
-            stat[obchody].mnozstvo:=prikazy[z].dokup;
-            stat[obchody].cena:=pole[i].cena;
-            //Zapis do statistik
-            if obchody>0 then
-            begin
-              ReWrite(transakcia);
-              WriteLn(transakcia,obchody);
-              for k:=1 to obchody do
-              begin
-                WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
-              end;
-              CloseFile(transakcia);
-            end;
-            //koniec transakcie
-          end;
-        end;
-      end;
-    end;
-  end;
-
-  //update suboru + tabulky po prikazoch
-  ReWrite(sklad);
-  WriteLn(sklad,riadky);
+  //cistenie pola nech mam nove hodnoty len
   for k:=0 to riadky-1 do
   begin
-    WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
-    StringGrid1.Cells[0,k+1]:=IntToStr(pole[k].kod);
-    StringGrid1.Cells[2,k+1]:=IntToStr(pole[k].mnozstvo);
+    pole[k].kod:=0;
+    pole[k].cena:=0;
+    pole[k].nazov:='';
+    pole[k].mnozstvo:=0;
   end;
-  CloseFile(sklad);
-
+  //StringGrid1.RowCount:=riadky+1;
+  //StringGrid1.ColCount:=3;
+  for i:=0 to riadky-1 do
+  begin
+    Read(tovar,c);
+    repeat
+        cislo:=cislo+c;
+      Read(tovar,c);
+    until c=';';
+    pole[i].kod:=StrToInt(cislo);
+    ReadLn(tovar,pole[i].nazov);
+    cislo:='';
+  end;
+  CloseFile(tovar);
 
 //CENA
 Reset(cena);
-  ReadLn(cena);
-  for i:=0 to riadky-1 do
+  ReadLn(cena,help);
+  for i:=0 to help-1 do
   begin
     Read(cena,c);
     repeat
@@ -239,30 +178,168 @@ Reset(cena);
     price:='';
     //StringGrid1.Cells[1,i+1]:=FloatToStr(pole[i].cena);
   end;
+  CloseFile(cena);
 
-//NAZOV
-Reset(tovar);
-  ReadLn(tovar);
-  for i:=0 to riadky-1 do
-  begin
-    Read(tovar,c);
-    repeat
-        cislo:=cislo+c;
-      Read(tovar,c);
-    until c=';';
-    ReadLn(tovar,namee);
+FileClose(F2);
+FileClose(F3);
+DeleteFile(path+'CENNIK_LOCK.txt');
+DeleteFile(path+'TOVAR_LOCK.txt');
+{end;}
 
-    for k:=0 to riadky-1 do
+  //SKLAD
+  Reset(sklad);
+    ReadLn(sklad,help);
+    for i:=0 to help-1 do
     begin
-      if StrToInt(cislo) = pole[k].kod then
+      Read(sklad,c);
+      repeat
+          cislo:=cislo+c;
+        Read(sklad,c);
+      until c=';';
+      ReadLn(sklad,ks);
+
+      for k:=0 to riadky-1 do
       begin
-        pole[k].nazov:=namee;
+        if StrToInt(cislo) = pole[k].kod then
+        begin
+          pole[k].mnozstvo:=StrToInt(ks);
+        end;
+      end;
+      cislo:='';
+      ks:='';
+    end;
+    CloseFile(sklad);
+
+    //Shity ked nema vsetko cenu
+      help:=riadky;
+      test:=0;
+      for k:=0 to help-1 do
+      begin
+        //vymazanie veci z pola ked nemaju este nahodenu cenu
+        if pole[k].cena=0 {(FloatToStr(pole[k].cena)='') and (pole[k].mnozstvo=0) or (FloatToStr(pole[k].cena)='') and (IntToStr(pole[k].mnozstvo)='')} then
+        begin
+          for z:=k to riadky-2 do
+          begin
+            pole[z].kod:=pole[z+1].kod;
+            pole[z].nazov:=pole[z+1].nazov;
+            pole[z].cena:=pole[z+1].cena;
+            pole[z].mnozstvo:=pole[z+1].mnozstvo;
+          end;
+          inc(test);
+        end;
+      end;
+      riadky:=riadky-test;
+      SetLength(pole,riadky);
+      StringGrid1.RowCount:=riadky+1;
+      //Memo2.Append(IntToStr(test)+' '+IntToStr(riadky));
+
+    //kontrola prikazov
+    for i:=0 to riadky-1 do
+    begin
+      if prikaz>0 then
+      begin
+        for z:=1 to prikaz do
+        begin
+          if (pole[i].kod = prikazy[z].kod) or (prikazy[z].kod = 0) then
+          begin
+            if pole[i].mnozstvo < prikazy[z].pokles then
+            begin
+              pole[i].mnozstvo:=pole[i].mnozstvo + prikazy[z].dokup;
+              Memo2.Append('Trvaly: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+IntToStr(prikazy[z].dokup)+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
+              //tu dojde generovanie transakcie
+              lock:=true;
+              //lock
+              repeat
+                if not FileExists(path+'STATISTIKY_LOCK.txt')=true then
+                  lock:=false;
+              until lock=false;
+              F4:=FileCreate(path+'STATISTIKY_LOCK.txt');
+              lock:=true;
+              //lock
+
+              Reset(transakcia);
+              ReadLn(transakcia,obchody);
+              SetLength(stat,obchody+1);
+              for k:=1 to obchody do
+              begin
+                //typ
+                Read(transakcia,stat[k].typ);
+                Read(transakcia,c);
+                Read(transakcia,c);
+                cislo:='';
+                //id transakcie
+                repeat
+                  cislo:=cislo+c;
+                  Read(transakcia,c);
+                until c=';';
+                stat[k].id_t:=StrToInt(cislo);
+                cislo:='';
+                Read(transakcia,c);
+                //id tovaru
+                repeat
+                  cislo:=cislo+c;
+                  Read(transakcia,c);
+                until c=';';
+                stat[k].kod:=StrToInt(cislo);
+                cislo:='';
+                Read(transakcia,c);
+                //mnozstvo
+                repeat
+                  cislo:=cislo+c;
+                  Read(transakcia,c);
+                until c=';';
+                stat[k].mnozstvo:=StrToInt(cislo);
+                cislo:='';
+                //cena kus
+                ReadLn(transakcia,cislo);
+                stat[k].cena:=StrToFloat(cislo);
+                cislo:='';
+              end;
+              //pridanie novej transakcie a zapisanie do suboru
+              inc(obchody);
+              SetLength(stat,obchody+1);
+              stat[obchody].typ:='N';
+              stat[obchody].id_t:=Random(89999999)+10000000;
+              stat[obchody].kod:=pole[i].kod;
+              stat[obchody].mnozstvo:=prikazy[z].dokup;
+              stat[obchody].cena:=pole[i].cena;
+              //Zapis do statistik
+              if obchody>0 then
+              begin
+                ReWrite(transakcia);
+                WriteLn(transakcia,obchody);
+                for k:=1 to obchody do
+                begin
+                  WriteLn(transakcia,stat[k].typ,';',stat[k].id_t,';',stat[k].kod,';',stat[k].mnozstvo,';',FloatToStr(stat[k].cena));
+                end;
+                CloseFile(transakcia);
+              end;
+              FileClose(F4);
+              DeleteFile(path+'STATISTIKY_LOCK.txt');
+              //koniec transakcie
+            end;
+          end;
+        end;
       end;
     end;
-    cislo:='';
-    namee:='';
-    StringGrid1.Cells[1,i+1]:=pole[i].nazov;
-  end;
+
+    //update suboru + tabulky po prikazoch
+    ReWrite(sklad);
+    WriteLn(sklad,riadky);
+    for k:=0 to riadky-1 do
+    begin
+      WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
+      StringGrid1.Cells[0,k+1]:=IntToStr(pole[k].kod);
+      StringGrid1.Cells[1,k+1]:=pole[k].nazov;
+      StringGrid1.Cells[2,k+1]:=IntToStr(pole[k].mnozstvo);
+    end;
+    CloseFile(sklad);
+
+
+  //DELETE LOCKU
+  FileClose(F1);
+  DeleteFile(path+'SKLAD_LOCK.txt');
+
 
   //nahodenie upozorneni
   Memo1.Clear;
@@ -275,17 +352,23 @@ Reset(tovar);
   end;
 
 end;
+end
+else
+  ShowMessage('Program nemôže správne pracovať, jeden z potrebných súborov chýba alebo je v nesprávnom formáte');
+end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Memo1.Clear;
   Memo2.Clear;
-  AssignFile(sklad,'SKLAD.txt');
-  AssignFile(tovar,'TOVAR.txt');
-  AssignFile(cena,'CENNIK.txt');
-  AssignFile(transakcia,'STATISTIKY.txt');
+  AssignFile(sklad,path+'SKLAD.txt');
+  AssignFile(tovar,path+'TOVAR.txt');
+  AssignFile(cena,path+'CENNIK.txt');
+  AssignFile(transakcia,path+'STATISTIKY.txt');
   prikaz:=0;
   //citanie SKLAD,CENA,TOVAR
+  editcennik:=FileAge(path+'CENNIK.txt');
+  edittovar:=FileAge(path+'TOVAR.txt');
   Kontrola;
   aktual:=true;
 end;
@@ -297,7 +380,7 @@ begin
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
-var z,cisla:boolean;i,k:integer;c:char;cislo:string;
+var z,cisla,lock:boolean;i,k,F4:integer;c:char;cislo:string;
 begin
 //MANUALNA OBJEDNAVKA
 aktual:=false;
@@ -305,6 +388,7 @@ Kontrola;
 z:=false;
 i:=0;
 cisla:=true;
+lock:=true;
 
 if (ID.Text='') or (Pocet.Text='') then
   cisla:=false;
@@ -322,6 +406,16 @@ repeat
     begin
       Memo2.Append('Manual: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Pocet.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
       pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Pocet.Text);
+
+      //lock
+      repeat
+        if not FileExists(path+'SKLAD_LOCK.txt')=true then
+          lock:=false;
+      until lock=false;
+      F4:=FileCreate(path+'SKLAD_LOCK.txt');
+      lock:=true;
+      //lock
+
       ReWrite(sklad);
       WriteLn(sklad,riadky);
       for k:=0 to riadky-1 do
@@ -329,9 +423,23 @@ repeat
         WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
       end;
       CloseFile(sklad);
+      //unlock
+      FileClose(F4);
+      DeleteFile(path+'SKLAD_LOCK.txt');
+
       //aktualizacia tabulky
       Kontrola;
       //tu dojde generovanie transakcie
+
+      //lock
+      repeat
+        if not FileExists(path+'STATISTIKY_LOCK.txt')=true then
+          lock:=false;
+      until lock=false;
+      F4:=FileCreate(path+'STATISTIKY_LOCK.txt');
+      lock:=true;
+      //lock
+
       Reset(transakcia);
       ReadLn(transakcia,obchody);
       SetLength(stat,obchody+1);
@@ -389,6 +497,8 @@ repeat
         end;
         CloseFile(transakcia);
       end;
+      FileClose(F4);
+      DeleteFile(path+'STATISTIKY_LOCK.txt');
       //koniec transakcie
     end
     else
@@ -413,6 +523,16 @@ repeat
         begin
           Memo2.Append('Manual: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Pocet.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
           pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Pocet.Text);
+
+          //lock
+          repeat
+            if not FileExists(path+'SKLAD_LOCK.txt')=true then
+              lock:=false;
+          until lock=false;
+          F4:=FileCreate(path+'SKLAD_LOCK.txt');
+          lock:=true;
+          //lock
+
           ReWrite(sklad);
           WriteLn(sklad,riadky);
           for k:=0 to riadky-1 do
@@ -420,9 +540,23 @@ repeat
             WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
           end;
           CloseFile(sklad);
+          //unlock
+          FileClose(F4);
+          DeleteFile(path+'SKLAD_LOCK.txt');
+
           //aktualizacia tabulky
           Kontrola;
           //tu dojde generovanie transakcie
+
+          //lock
+          repeat
+            if not FileExists(path+'STATISTIKY_LOCK.txt')=true then
+              lock:=false;
+          until lock=false;
+          F4:=FileCreate(path+'STATISTIKY_LOCK.txt');
+          lock:=true;
+          //lock
+
           Reset(transakcia);
           ReadLn(transakcia,obchody);
           SetLength(stat,obchody+1);
@@ -480,6 +614,8 @@ repeat
             end;
             CloseFile(transakcia);
           end;
+          FileClose(F4);
+          DeleteFile(path+'STATISTIKY_LOCK.txt');
           //koniec transakcie
         end
         else
@@ -507,7 +643,7 @@ cisla:=true;
     cisla:=false;
   end;
 
-  if (cisla=true) and (prikaz>0) then
+  if (cisla=true) and (prikaz>0) and (StrToInt(Edit3.Text) <= prikaz) then
   begin
     aktual:=false;
     help:=StrToInt(Edit3.text);
@@ -533,7 +669,7 @@ cisla:=true;
     end;
   end
   else
-    ShowMessage('Príkaz z daným číslom nie je aktuálny');
+    ShowMessage('Príkaz s daným číslom nie je aktuálny');
 end;
 
 procedure TForm1.Button7Click(Sender: TObject);
@@ -667,12 +803,15 @@ aktual:=true;
 end;
 
 procedure TForm1.Button8Click(Sender: TObject);
-var i,k:integer;cisla:boolean;c:char;cislo:string;
+var i,k,F4:integer;cisla,lock:boolean;c:char;cislo:string;
 begin
 //SEMI-AUTO NAKUP
 aktual:=false;
 Kontrola;
 cisla:=true;
+lock:=true;
+
+
 
 if (Edit1.Text='') or (Edit2.Text='') then
   cisla:=false;
@@ -685,6 +824,16 @@ begin
     begin
       Memo2.Append('Semi-auto: '+'['+IntToStr(pole[i].kod)+']'+pole[i].nazov+' '+Edit2.Text+'ks     '+DateToStr(Date)+' '+TimeToStr(Time));
       pole[i].mnozstvo:=pole[i].mnozstvo+StrToInt(Edit2.Text);
+
+      //lock
+      repeat
+        if not FileExists(path+'SKLAD_LOCK.txt')=true then
+          lock:=false;
+      until lock=false;
+      F4:=FileCreate(path+'SKLAD_LOCK.txt');
+      lock:=true;
+      //lock
+
       ReWrite(sklad);
       WriteLn(sklad,riadky);
       for k:=0 to riadky-1 do
@@ -692,9 +841,23 @@ begin
         WriteLn(sklad,pole[k].kod,';',pole[k].mnozstvo);
       end;
       CloseFile(sklad);
+      //unlock
+      FileClose(F4);
+      DeleteFile(path+'SKLAD_LOCK.txt');
+
       //aktualizacia tabulky
       Kontrola;
       //tu dojde generovanie transakcie
+
+      //lock
+      repeat
+        if not FileExists(path+'STATISTIKY_LOCK.txt')=true then
+          lock:=false;
+      until lock=false;
+      F4:=FileCreate(path+'STATISTIKY_LOCK.txt');
+      lock:=true;
+      //lock
+
       Reset(transakcia);
       ReadLn(transakcia,obchody);
       SetLength(stat,obchody+1);
@@ -752,6 +915,9 @@ begin
         end;
         CloseFile(transakcia);
       end;
+      FileClose(F4);
+      DeleteFile(path+'STATISTIKY_LOCK.txt');
+      //koniec transakcie
     end;
   end;
 end
