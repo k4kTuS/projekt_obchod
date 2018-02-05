@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 878
+  Left = 899
   Height = 469
-  Top = 119
+  Top = 130
   Width = 955
   Caption = 'Sklad'
   ClientHeight = 469
@@ -74,6 +74,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 64
+        MaxLength = 18
         ParentShowHint = False
         TabOrder = 0
       end
@@ -82,6 +83,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 80
+        MaxLength = 18
         NumbersOnly = True
         TabOrder = 1
       end
@@ -120,6 +122,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 64
+        MaxLength = 18
         TabOrder = 0
       end
       object pocet_2: TEdit
@@ -127,6 +130,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 80
+        MaxLength = 18
         NumbersOnly = True
         TabOrder = 1
       end
@@ -135,6 +139,7 @@ object Form1: TForm1
         Height = 23
         Top = 104
         Width = 96
+        MaxLength = 18
         NumbersOnly = True
         TabOrder = 2
       end
@@ -189,6 +194,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 112
+        MaxLength = 18
         NumbersOnly = True
         TabOrder = 0
       end
@@ -197,6 +203,7 @@ object Form1: TForm1
         Height = 23
         Top = 24
         Width = 80
+        MaxLength = 18
         NumbersOnly = True
         TabOrder = 1
       end
@@ -314,6 +321,7 @@ object Form1: TForm1
     Height = 23
     Top = 264
     Width = 80
+    MaxLength = 18
     NumbersOnly = True
     TabOrder = 6
   end

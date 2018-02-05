@@ -41,6 +41,7 @@ type
     Label1: TLabel;
     Memo1: TMemo;
     PageControl1: TPageControl;
+    StaticText1: TStaticText;
     StringGrid1: TStringGrid;
     StringGrid3: TStringGrid;
     TabSheet1: TTabSheet;
@@ -51,6 +52,7 @@ type
     procedure Button3Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Kontrola;
@@ -82,10 +84,10 @@ type
     cena:float;
   end;
 const
-  path='';  //\\comenius\public\market\timb\
+  path='\\comenius\public\market\timb\';  //\\comenius\public\market\timb\
 var
   Form1: TForm1;
-  sklad,cena,tovar,transakcia:textfile;
+  sklad,cena,tovar,transakcia,historia:textfile;
   pole:array of hodnoty;
   prikazy:array of trvale;
   stat:array of statistiky;
@@ -359,13 +361,16 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  DefaultFormatSettings.DecimalSeparator := '.' ;
   Memo1.Clear;
   Memo2.Clear;
   AssignFile(sklad,path+'SKLAD.txt');
   AssignFile(tovar,path+'TOVAR.txt');
   AssignFile(cena,path+'CENNIK.txt');
   AssignFile(transakcia,path+'STATISTIKY.txt');
+  AssignFile(historia,path+'HISTORIA.txt');
   prikaz:=0;
+  Memo2.Lines.LoadFromFile('HISTORIA.txt');
   //citanie SKLAD,CENA,TOVAR
   editcennik:=FileAge(path+'CENNIK.txt');
   edittovar:=FileAge(path+'TOVAR.txt');
@@ -926,5 +931,11 @@ else
 
 aktual:=true;
 end;
+
+procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  Memo2.Lines.SaveToFile('HISTORIA.txt');
+end;
+
 end.
 

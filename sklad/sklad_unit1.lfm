@@ -7,6 +7,7 @@ object Form1: TForm1
   ClientHeight = 469
   ClientWidth = 955
   Color = clGradientActiveCaption
+  OnClose = FormClose
   OnCreate = FormCreate
   LCLVersion = '1.6.4.0'
   object Memo1: TMemo
@@ -157,7 +158,7 @@ object Form1: TForm1
         Height = 19
         Top = 56
         Width = 190
-        Caption = 'Univerzalny prikaz (vsetok tovar)'
+        Caption = 'Univerzálny príkaz (všetok tovar)'
         TabOrder = 4
       end
       object Label10: TLabel
@@ -231,6 +232,15 @@ object Form1: TForm1
         Width = 65
         Caption = 'Dokúpiť (ks)'
         ParentColor = False
+      end
+      object StaticText1: TStaticText
+        Left = 0
+        Height = 48
+        Top = 112
+        Width = 240
+        Alignment = taCenter
+        Caption = 'Ihneď dokúpi zadaný počet kusov'#13#10'pre každý produkt s množstvom'#13#10'pod uvedenou hodnotou'
+        TabOrder = 3
       end
     end
   end
